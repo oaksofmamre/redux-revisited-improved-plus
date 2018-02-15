@@ -3,7 +3,7 @@ import ReactDOM from "react-dom";
 import "./index.css";
 import App from "./App";
 
-import { createStore } from "redux";
+import { createStore, combineReducers } from "redux";
 
 /////////////////////////////////////////
 //
@@ -13,7 +13,7 @@ import { createStore } from "redux";
 const TODO_ADD = "TODO_ADD";
 const TODO_TOGGLE = "TODO_TOGGLE";
 
-function reducer(state, action) {
+function todoReducer(state = [], action) {
   switch (action.type) {
     case TODO_ADD: {
       return applyAddTodo(state, action);
@@ -40,9 +40,34 @@ function applyToggleTodo(state, action) {
   );
 }
 
+////////////////////
+
+const FILTER_SET = "FILTER_SET";
+
+function filterReducer(state = "SHOW_ALL", action) {
+  switch (action.type) {
+    case FILTER_SET: {
+      return applySetFilter(state, action);
+    }
+    default:
+      return state;
+  }
+}
+
+function applySetFilter(state, action) {
+  return action.filter;
+}
+
+////////////////////
+
+const rootReducer = combineReducers({
+  todoState: todoReducer,
+  filterState: filterReducer
+});
+
 /////////////////////////////////////////
 
-const store = createStore(reducer, []);
+const store = createStore(rootReducer);
 
 console.log("initial state:");
 console.log(store.getState());
@@ -66,11 +91,21 @@ function doToggleTodo(id) {
   return { type: TODO_TOGGLE, todo: { id } };
 }
 
+////////////////////
+
+function doSetFilter(filter) {
+  return { type: FILTER_SET, filter };
+}
+
 store.dispatch(doAddTodo("0", "learn redux"));
 store.dispatch(doAddTodo("1", "learn mobx"));
 store.dispatch(doAddTodo("2", "finish final project"));
 store.dispatch(doToggleTodo("0"));
 store.dispatch(doToggleTodo("1"));
+store.dispatch(doSetFilter("COMPLETED"));
+store.dispatch(doSetFilter("DONE"));
+store.dispatch(doSetFilter("PENDING"));
+store.dispatch(doSetFilter("SHOW_ALL"));
 
 /////////////////////////////////////////
 
